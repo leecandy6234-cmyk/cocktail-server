@@ -13,6 +13,15 @@ const pool = mysql.createPool({
 
 const app = express();
 
+app.use((req, res, next) => {
+  //cors 허용
+  res.header("Access-Control-Allow-Origin", "http://localhost:5173");
+  // get(조회), ponst(추가), put,(수정) delete(삭제) 요청 허용)
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+  // JSON 데이터 받을 수 있도록 허용
+  res.header("Access-Control-Allow-Headers", "Content-Type");
+  next();
+});
 app.use(express.json()); //제이슨 형태로 들어오는 요청을 파싱해서 req.body에 추가
 
 app.get("/", (req, res) => {
