@@ -50,10 +50,17 @@ app.post("/recipes", async (req, res) => {
 });
 // DB에 있는 칵테일 레시피들 조회 : get
 app.get("/recipes", async (req, res) => {
+  const keyword = req.query.keyword;
+  const searchKeyword = `%${keyword}%`;
+
   // SELECT * FROM recipes
-  const [result] = await pool.query("SELECT * FROM recipes");
+  const [result] = await pool.query(
+    "SELECT * FROM recipes WHERE name LIKE ? ORDER BY id DESC",
+    [searchKeyword],
+  );
   res.status(200).json(result);
 });
+
 app.listen(4000, () => {
   console.log("서버가 4000번 포트에서 실행 중입니다.");
 });
