@@ -1,17 +1,32 @@
-CREATE TABLE recipes(
-	name VARCHAR(50),
-    image VARCHAR(200),
-    descrpition TEXT
-);
+DROP TABLE ingredients;
+DROP TABLE recipes;
+DROP TABLE users;
 
 CREATE TABLE users(
-    id VARCHAR(50),
-    name VARCHAR(50),
-    email VARCHAR(200),
-    gender CHAR(1),
-    password VARCHAR(200),
-    nickname VARCHAR(200),
-    phone VARCHAR(20),
-    address VARCHAR(200),
-    birth DATE
+	id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(200) NOT NULL UNIQUE,
+    password VARCHAR(200) NOT NULL
+);
+CREATE TABLE recipes(
+	id INT AUTO_INCREMENT PRIMARY KEY,
+	user_id INT,
+	name VARCHAR(50) NOT NULL,
+    image VARCHAR(200) NOT NULL,
+    description TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+);
+CREATE TABLE ingredients (
+	id INT AUTO_INCREMENT PRIMARY KEY,
+	recipe_id INT,
+	name VARCHAR(100) NOT NULL,    
+	amount VARCHAR(50) NOT NULL,   
+	FOREIGN KEY (recipe_id) REFERENCES recipes(id) ON DELETE CASCADE
+);
+CREATE TABLE directions(
+	id INT AUTO_INCREMENT PRIMARY KEY,
+	recipe_id INT,
+	content TEXT NOT NULL,
+	FOREIGN KEY (recipe_id) REFERENCES recipes(id) ON DELETE CASCADE
 );

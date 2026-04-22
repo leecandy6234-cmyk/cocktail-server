@@ -1,17 +1,23 @@
 import express from "express";
 // DB와 연결된 pool을 db.js 파일에서 가져온다
 import pool from "../db.js";
+import authMiddleware from "../middleware/auth.js";
+import upload from "../middleware/upload.js";
 
 const router = express.Router(); // Router 객체 생성
 // router는 app처럼 get, post, put, delete 사용 가능
 
 // DB에 값을 추가(post)
-router.post("/", async (req, res) => {
+router.post("/", authMiddleware, upload.single("image"), async (req, res) => {
   try {
-    const { name, image, description } = req.body;
+    const { name, description, ingredients, directions } = req.body;
+    console.log(ingredients);
+    console.log(directions);
+    const image = req.file.filename; // 업로드된 파일의 이름
+    const userId = req.userId;
     await pool.query(
-      "INSERT INTO recipes(name, image, description) VALUES(?, ?, ?)",
-      [name, image, description],
+      "INSERT INTO recipes(user_id, name, image, description) VALUES(?, ?, ?, ?)",
+      [userId, name, image, description],
     );
     res.status(201).json({ name, image, description });
   } catch (error) {

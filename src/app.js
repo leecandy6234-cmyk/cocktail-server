@@ -6,7 +6,15 @@ import express from "express";
 import recipesRouter from "./routes/recipes.js";
 import usersRouter from "./routes/users.js";
 
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
+
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 app.use((req, res, next) => {
   // CORS 허용
@@ -14,7 +22,8 @@ app.use((req, res, next) => {
   // GET(조회), POST(추가), PUT(수정), DELETE(삭제) 요청 허용
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
   // JSON 데이터 받을 수 있도록 허용
-  res.header("Access-Control-Allow-Headers", "Content-Type");
+  // Authorization 헤더 추가
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
   next();
 });
 

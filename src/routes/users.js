@@ -52,28 +52,25 @@ router.post("/login", async (req, res) => {
     }
 
     const user = checked[0];
-    // 비밀번호 확인 -> 사용자한테 입력받은 비밀번호, DB에 암호화해서 저장된 비밀번호
-    // bcrypt.compare(사용자한테 입력받은 비밀번호, DB에 자장된 비밀번호)
-    // 암호화 된 값끼리 비교하는게 아니라
-    // 입력한 비밀번호를 동일한 방식으로 암호화해서 DB값과 비교
+    // 비밀번호 확인
+    // bcrypt.compare(사용자한테 입력받은 비밀번호, DB에 암호화해서 저장된 비밀번호)
+    // 암호화된 값끼리 비교하는 게 아니라
+    // 입력한 비밀번호를 동일한 방식으로 암호화해서 DB 값과 비교
     const isMatch = await bcrypt.compare(password, user.password);
-
     if (!isMatch) {
       return res
         .status(401)
         .json({ message: "이메일 또는 비밀번호가 잘못되었습니다." });
     }
+
     // 로그인 성공! -> JWT 토큰 생성 (출입증 발급)
-    // JSON WEB TOKEN) : 사용자 인증 정보를 안전하게 전송하기 위한 토큰
-    // JWT.SIGN (토큰에 담을 정보, 비밀키, 옵션)
-    // expiresIn :토큰의 유효기간 (7D 7d 7일/1h= 1시간/ 1m=1 분=60)
-    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
+    // JWT (JSON Web Token) : 사용자 인증 정보를 안전하게 전송하기 위한 토큰
+    // jwt.sign(토큰에 담을 정보, 비밀키, 옵션)
+    // expiresIn : 토큰의 유효기간 (7d = 7일, 1h = 1시간, 1m = 1분 = 60)
+    const token = jwt.sign({ userId: user.id }, process.env.SECRET_KEY, {
       expiresIn: "7d",
     });
-
-    res
-      .status(200)
-      .json({ message: "로그인 성공" }, { token, name: user.name });
+    res.status(200).json({ message: "로그인 성공", token, name: user.name });
   } catch (error) {
     res.status(500).json({ message: "서버 에러" });
   }
