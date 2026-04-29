@@ -30,9 +30,13 @@ app.use((req, res, next) => {
 // JSON 형태로 들어오는 요청을 파싱해서 req.body에 추가
 app.use(express.json());
 
+// http://localhost:4000/recipes
 app.use("/recipes", recipesRouter);
+
+// http://localhost:4000/users
 app.use("/users", usersRouter);
 
+// http://localhost:4000
 app.listen(4000, () => {
   console.log("4000번 포트번호로 서버 실행중");
 });

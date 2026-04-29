@@ -8,17 +8,42 @@ const router = express.Router(); // Router 객체 생성
 // router는 app처럼 get, post, put, delete 사용 가능
 
 // DB에 값을 추가(post)
+//post http://localhost:4000/recipes
 router.post("/", authMiddleware, upload.single("image"), async (req, res) => {
   try {
-    const { name, description, ingredients, directions } = req.body;
-    console.log(ingredients);
-    console.log(directions);
+    const { name, description } = req.body;
     const image = req.file.filename; // 업로드된 파일의 이름
     const userId = req.userId;
-    await pool.query(
+    // ForData로 전달 된 JSON 문자열 파싱
+    const ingredients = JSON.parse(req.body.ingredients);
+    const directions = JSON.parse(req.body.directions);
+
+    console.log(ingredients);
+    console.log(directions);
+
+    const [result] = await pool.query(
       "INSERT INTO recipes(user_id, name, image, description) VALUES(?, ?, ?, ?)",
       [userId, name, image, description],
     );
+
+    const recipeId = result.insertId;
+
+    // ingredients 테이블에 추가
+    for (let i = 0; i < ingredients.length; i++) {
+      await pool.query(
+        "INSERT INTO ingredients(recipe_id, name, amount) VALUES(?, ?, ?)",
+        [recipeId, ingredients[i].name, ingredients[i].amount],
+      );
+    }
+
+    //directions 테이블 추가
+    for (const direction of directions) {
+      await pool.query(
+        "INSERT INTO directions(recipe_id, content) VALUES(?, ?)",
+        [recipeId, direction.content],
+      );
+    }
+
     res.status(201).json({ name, image, description });
   } catch (error) {
     console.error(error);
@@ -46,10 +71,22 @@ router.get("/", async (req, res) => {
   }
 });
 
+// http://localhost:4000/recipes/:id
 router.get("/:id", async (req, res) => {
   const id = req.params.id;
   const [result] = await pool.query("SELECT * FROM recipes WHERE id = ?", [id]);
-  res.status(200).json(result);
+
+  const [ingredients] = await pool.query(
+    "SELECT * FROM ingredients WHERE recipe_id = ?",
+    [id],
+  );
+  const [directions] = await pool.query(
+    "SELECT * FROM directions WHERE recipe_id = ?",
+    [id],
+  );
+
+  // SELECT * FROM
+  res.status(200).json({ result: result[0], ingredients, directions });
 });
 
 export default router;
